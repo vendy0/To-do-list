@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      #bienvenue {
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        color: #999898;
+      }
+
+      h1 {
+        animation: welcome 0.5s ease-in-out;
+      }
+
+      @keyframes welcome {
+        from {
+          opacity: 0;
+          transform: translateY(-50%);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bienvenue"></div>
+    <button type="submit" id="sub-button">Entrer un nom</button>
+
+    <br /><br />
+
+    <input type="text" name="object-label" id="object-label" value="" />
+    <button type="submit" id="submit">Submit</button>
+
+    <script>
+      const subButton = document.getElementById("sub-button");
+      let showName = false;
+      const welcomeArea = document.getElementById("bienvenue");
+
+      let storedName = localStorage.getItem("name");
+      if (storedName) {
+        welcome(storedName);
+        subButton.textContent = "Changer de nom";
+      } else {
+        subButton.textContent = "Entrer un nom";
+      }
+
+      function welcome(name) {
+        if (!showName) {
+          const h1 = document.createElement("h1");
+          h1.textContent = `Bienvenue ${name}`;
+          welcomeArea.appendChild(h1);
+
+          localStorage.setItem("name", name);
+          subButton.textContent = "Changer de nom";
+          showName = true;
+        } else {
+          removeWelcome(name);
+        }
+      }
+
+      function removeWelcome(name) {
+        welcomeArea.lastChild.remove();
+        showName = false;
+        welcome(name);
+      }
+
+      subButton.addEventListener("click", () => {
+        let name = prompt("Entrez votre nom.").trim();
+        if (name) {
+          welcome(name);
+        } else {
+          alert("Entrez un nom valide !");
+        }
+      });
+
+      // On passe a une nouvelle ètame, je te prierais chatGPT, de bien vouloir ignorer le code en hait s'il te plait (le script).
+
+      const objectElement = document.getElementById("object-label");
+      const submitButton = document.getElementById("submit");
+    </script>
+  </body>
+</html>

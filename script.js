@@ -11,7 +11,7 @@ const deleteAllButton = document.getElementById("delete-all-button");
 // Fonction pour changer le mode du Bouton delete.
 function updateDeleteButtonState() {
 	let children = unorderedList.querySelectorAll("li");
-	const isInSaveMode = deleteTask.dataset.action === "save";
+	const isInSaveMode = deleteTask.dataset.action === "delete";
 
 	if (
 		isInSaveMode &&

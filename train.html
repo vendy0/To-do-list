@@ -40,7 +40,9 @@
 
 		<input type="text" name="object-label" id="object-label" value="" />
 		<button type="submit" id="submit">Submit</button>
-		<button type="submit" id="delete-button">Supprimer</button>
+		<button type="submit" id="delete-button" data-state="save"
+			>Supprimer</button
+		>
 
 		<ul id="unordered-list"> </ul>
 
@@ -99,9 +101,11 @@
 			);
 			if (savedList) {
 				savedList.forEach((element) => {
-					let li = document.createElement("li");
-					li.textContent = element.label;
-					document.body.appendChild(li);
+					if (element.label.trim()) {
+						let li = document.createElement("li");
+						li.textContent = element.label;
+						unorderedList.appendChild(li);
+					}
 				});
 			}
 
@@ -116,7 +120,7 @@
 				let object1 = {
 					"label": objectLabel.value.trim(),
 					"statut": "unchecked",
-					"when": now.getFullYear(),
+					"when": now.getMonth(),
 				};
 				taskList.push(object1);
 				objectLabel.value = "";
@@ -129,7 +133,7 @@
 
 				const li = document.createElement("li");
 				li.textContent = object1.label;
-				document.unorderedList.appendChild(li);
+				unorderedList.appendChild(li);
 			});
 
 			objectLabel.addEventListener("keypress", (e) => {
@@ -137,13 +141,30 @@
 			});
 
 			deleteButton.addEventListener("click", () => {
-				let listAll = unorderedList.querySelectorAll("li");
-				listAll.forEach((list) => {
-					list.addEventListener("click", () => {
-						let index = listAll.findIndex((t) => t === list.label);
-					if (index != -1) tasks.splice(index, 1);
+				if (deleteButton.dataset.state === "save") {
+					deleteButton.dataset.state = "delete";
+				} else {
+					deleteButton.dataset.state = "save";
+				}
+				console.log(deleteButton.dataset.state);
+
+
+				if (deleteButton.dataset.state === "delete") {
+					let listAllObj = JSON.parse(
+						localStorage.getItem("taskList") || "[]"
+					);
+					let listAll = unorderedList.querySelectorAll("li");
+					listAll.forEach((list) => {
+						let label = list.textContent.trim();
+						list.addEventListener("click", () => {
+							let index = listAllObj.findIndex(
+								(t) => t.label === label
+							);
+							listAllObj.splice(index, 1);
+							console.log(listAllObj);
+						});
 					});
-				});
+				}
 			});
 		</script>
 	</body>

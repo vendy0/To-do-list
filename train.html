@@ -35,8 +35,9 @@
 	<body>
 		<div id="bienvenue"></div>
 		<button type="submit" id="sub-button">Entrer un nom</button>
+		<button type="submit" id="delete-name">Supprimer le nom</button>
 
-		<br /><br />
+		<hr/>
 
 		<input type="text" name="object-label" id="object-label" value="" />
 		<button type="submit" id="submit">Submit</button>
@@ -50,6 +51,7 @@
 			const subButton = document.getElementById("sub-button");
 			let showName = false;
 			const welcomeArea = document.getElementById("bienvenue");
+			const deleteName = document.getElementById("delete-name");
 
 			let storedName = localStorage.getItem("name");
 			if (storedName) {
@@ -86,6 +88,12 @@
 				} else {
 					alert("Entrez un nom valide !");
 				}
+			});
+
+			deleteName.addEventListener("click", () => {
+				localStorage.removeItem("name");
+				welcomeArea.lastChild.remove();
+				subButton.textContent = "Entrer un nom";
 			});
 
 			// On passe a une nouvelle étape, je te prierais chatGPT, de bien vouloir ignorer le code en haut s'il te plait (le script qui vient avant ce commentaire).
@@ -147,7 +155,6 @@
 					deleteButton.dataset.state = "save";
 				}
 				console.log(deleteButton.dataset.state);
-
 
 				if (deleteButton.dataset.state === "delete") {
 					let listAllObj = JSON.parse(

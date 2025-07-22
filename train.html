@@ -1,90 +1,150 @@
+<!-- @format -->
+
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Document</title>
-    <style>
-      #bienvenue {
-        display: flex;
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        color: #999898;
-      }
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Document</title>
+		<style>
+			#bienvenue {
+				display: flex;
+				text-align: center;
+				justify-content: center;
+				align-items: center;
+				color: #999898;
+			}
 
-      h1 {
-        animation: welcome 0.5s ease-in-out;
-      }
+			h1 {
+				animation: welcome 0.5s ease-in-out;
+			}
 
-      @keyframes welcome {
-        from {
-          opacity: 0;
-          transform: translateY(-50%);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="bienvenue"></div>
-    <button type="submit" id="sub-button">Entrer un nom</button>
+			@keyframes welcome {
+				from {
+					opacity: 0;
+					transform: translateY(-50%);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div id="bienvenue"></div>
+		<button type="submit" id="sub-button">Entrer un nom</button>
 
-    <br /><br />
+		<br /><br />
 
-    <input type="text" name="object-label" id="object-label" value="" />
-    <button type="submit" id="submit">Submit</button>
+		<input type="text" name="object-label" id="object-label" value="" />
+		<button type="submit" id="submit">Submit</button>
+		<button type="submit" id="delete-button">Supprimer</button>
 
-    <script>
-      const subButton = document.getElementById("sub-button");
-      let showName = false;
-      const welcomeArea = document.getElementById("bienvenue");
+		<ul id="unordered-list"> </ul>
 
-      let storedName = localStorage.getItem("name");
-      if (storedName) {
-        welcome(storedName);
-        subButton.textContent = "Changer de nom";
-      } else {
-        subButton.textContent = "Entrer un nom";
-      }
+		<script>
+			const subButton = document.getElementById("sub-button");
+			let showName = false;
+			const welcomeArea = document.getElementById("bienvenue");
 
-      function welcome(name) {
-        if (!showName) {
-          const h1 = document.createElement("h1");
-          h1.textContent = `Bienvenue ${name}`;
-          welcomeArea.appendChild(h1);
+			let storedName = localStorage.getItem("name");
+			if (storedName) {
+				welcome(storedName);
+				subButton.textContent = "Changer de nom";
+			} else {
+				subButton.textContent = "Entrer un nom";
+			}
 
-          localStorage.setItem("name", name);
-          subButton.textContent = "Changer de nom";
-          showName = true;
-        } else {
-          removeWelcome(name);
-        }
-      }
+			function welcome(name) {
+				if (!showName) {
+					const h1 = document.createElement("h1");
+					h1.textContent = `Bienvenue ${name}`;
+					welcomeArea.appendChild(h1);
 
-      function removeWelcome(name) {
-        welcomeArea.lastChild.remove();
-        showName = false;
-        welcome(name);
-      }
+					localStorage.setItem("name", name);
+					subButton.textContent = "Changer de nom";
+					showName = true;
+				} else {
+					removeWelcome(name);
+				}
+			}
 
-      subButton.addEventListener("click", () => {
-        let name = prompt("Entrez votre nom.").trim();
-        if (name) {
-          welcome(name);
-        } else {
-          alert("Entrez un nom valide !");
-        }
-      });
+			function removeWelcome(name) {
+				welcomeArea.lastChild.remove();
+				showName = false;
+				welcome(name);
+			}
 
-      // On passe a une nouvelle ètame, je te prierais chatGPT, de bien vouloir ignorer le code en hait s'il te plait (le script).
+			subButton.addEventListener("click", () => {
+				let name = prompt("Entrez votre nom.").trim();
+				if (name) {
+					welcome(name);
+				} else {
+					alert("Entrez un nom valide !");
+				}
+			});
 
-      const objectElement = document.getElementById("object-label");
-      const submitButton = document.getElementById("submit");
-    </script>
-  </body>
+			// On passe a une nouvelle étape, je te prierais chatGPT, de bien vouloir ignorer le code en haut s'il te plait (le script qui vient avant ce commentaire).
+
+			let taskList = JSON.parse(localStorage.getItem("taskList") || "[]");
+			const objectLabel = document.getElementById("object-label");
+			const submitButton = document.getElementById("submit");
+			const deleteButton = document.getElementById("delete-button");
+			const unorderedList = document.getElementById("unordered-list");
+
+			let savedList = JSON.parse(
+				localStorage.getItem("taskList") || "[]"
+			);
+			if (savedList) {
+				savedList.forEach((element) => {
+					let li = document.createElement("li");
+					li.textContent = element.label;
+					document.body.appendChild(li);
+				});
+			}
+
+			submitButton.addEventListener("click", () => {
+				if (!objectLabel.value.trim()) {
+					alert("Entrez une tâche valide !");
+					objectLabel.textContent = "";
+					objectLabel.focus();
+					return;
+				}
+				let now = new Date();
+				let object1 = {
+					"label": objectLabel.value.trim(),
+					"statut": "unchecked",
+					"when": now.getFullYear(),
+				};
+				taskList.push(object1);
+				objectLabel.value = "";
+				objectLabel.focus();
+
+				localStorage.setItem("taskList", JSON.stringify(taskList));
+				let savedList = JSON.parse(
+					localStorage.getItem("taskList") || "[]"
+				);
+
+				const li = document.createElement("li");
+				li.textContent = object1.label;
+				document.unorderedList.appendChild(li);
+			});
+
+			objectLabel.addEventListener("keypress", (e) => {
+				if (e.key == "Enter") submitButton.click();
+			});
+
+			deleteButton.addEventListener("click", () => {
+				let listAll = unorderedList.querySelectorAll("li");
+				listAll.forEach((list) => {
+					list.addEventListener("click", () => {
+						let index = listAll.findIndex((t) => t === list.label);
+					if (index != -1) tasks.splice(index, 1);
+					});
+				});
+			});
+		</script>
+	</body>
 </html>

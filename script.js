@@ -97,7 +97,7 @@ function toogleDeleteMode() {
 	let children = unorderedList.querySelectorAll("li");
 	let tasks = JSON.parse(localStorage.getItem("taskList") || "[]");
 	// Changer le texte et le data state du bouton
-	if (deleteTask.dataset.action === "save") {
+	if (deleteTask.dataset.action === "save") {	
 		// Comme la condition n’est pas respectée, on agit comme dans "default"
 		deleteTask.dataset.action = "delete";
 		deleteTask.textContent = "Terminé";
@@ -167,7 +167,7 @@ function deleteAllFunction() {
 			child.remove();
 		});
 		newPlaceholder();
-		localStorage.clear();
+		localStorage.removeItem("taskList");
 		updateDeleteButtonState();
 	}
 }

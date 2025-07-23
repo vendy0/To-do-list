@@ -1,11 +1,9 @@
-<!-- @format -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" conent="ie=edge" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Document</title>
     <link rel="stylesheet" href="style.css" type="text/css" media="all" />
     <style type="text/css" media="all">
@@ -84,7 +82,7 @@
         object1.statut = "unchecked";
         object1.category = "none";
         taskListStored.push(object1);
-        localStorage.setItem("taskList", JSON.stringify(taskListStored));
+        sauvegarder(taskListStored);
       }
 
       // Fonction pour virer les accents et la casse
@@ -120,6 +118,57 @@
         }
       }
 
+      // Fonction pour recreer les elements pour supprimer l'ecouteur d'Event
+      function recreateElements() {
+        document.querySelectorAll("li").forEach((li) => {
+          li.classList.remove("delete-mode");
+          let clone = li.cloneNode(true);
+          li.replaceWith(clone);
+        });
+      }
+
+      // Fonction pour supprimer une tache
+      function deleteATask(task) {
+        let taskListStored = sync();
+        let index = taskListStored.findIndex(
+          (t) => t.label === task.textContent.trim()
+        );
+        taskListStored.splice(index, 1);
+        return taskListStored;
+      }
+
+      // Fonction pour sauvegarder dans le localStorage
+      function sauvegarder(taskListStored) {
+        localStorage.setItem("taskList", JSON.stringify(taskListStored));
+      }
+
+      // Fonction pour recuperer du le localStorage
+      function sync() {
+        let taskListStored = JSON.parse(
+          localStorage.getItem("taskList") || "[]"
+        );
+        return taskListStored;
+      }
+
+      // Fonction de suppression
+      function deleteMode() {
+        unorderedList.querySelectorAll("li").forEach((task) => {
+          task.addEventListener("click", () => {
+            // Confirmation :
+            let hasConfirmed = false;
+            hasConfirmed = confirm(
+              `Voulez-vous vraiment supprimer cette tache : ${task.textContent} ?`
+            );
+
+            if (hasConfirmed) {
+              let taskListStored = deleteATask(task);
+              task.remove();
+              sauvegarder(taskListStored);
+            }
+          });
+        });
+      }
+
       /*
        * Fonction pour Changer de mode save / delete.
        * Changer de mode
@@ -133,49 +182,7 @@
           enterTaskInput.disabled = true;
           deleteAllTaskButton.disabled = true;
 
-          unorderedList.querySelectorAll("li").forEach((task) => {
-            task.addEventListener("click", () => {
-              let hasConfirmed = false;
-              hasConfirmed = confirm(
-                `Voulez-vous vraiment supprimer cette tache : ${task.textContent} ?`
-              );
-              if (hasConfirmed) {
-                let taskListStored = JSON.parse(
-                  localStorage.getItem("taskList") || "[]"
-                );
-
-                let labelList = [placeholder.textContent];
-
-                for (let cle of taskListStored) {
-                  labelList.push(cle.label);
-                }
-
-                let index = labelList.findIndex((t) => t === task.textContent);
-                console.log(task.textContent);
-                console.log(index);
-
-                //  console.log(taskListStored);
-
-                // taskListStored.forEach((obj) => {
-                // console.log(obj.statut);
-                //});
-
-                // let tasd = taskListStored.some(
-                //   (t) => t.label === task.textContent
-                // );
-                // console.log(tasd);
-
-                //
-
-                // localStorage.setItem(
-                // "taskList",
-
-                // JSON.stringify(taskListStored)
-                // );
-                task.remove();
-              }
-            });
-          });
+          deleteMode();
         } else {
           deleteATaskButton.dataset.mode = "saveMode";
           deleteATaskButton.textContent = "Supprimer une tâche";
@@ -183,22 +190,9 @@
           enterTaskInput.disabled = false;
           deleteAllTaskButton.disabled = false;
 
-          document.querySelectorAll("li").forEach((li) => {
-            li.classList.remove("delete-mode");
-            let clone = li.cloneNode(true);
-            li.replaceWith(clone);
-          });
+          recreateElements();
         }
       }
-
-      /*
-      let confirm = confirm(
-      	`Voulez-vous vraiment supprimer cette tâche : \"${task}\" ?`
-      );
-      if (confirm) {
-      	task.remove();
-      }
-      */
 
       // Fonction pour supprimer des éléments
 
@@ -229,6 +223,13 @@
       deleteATaskButton.addEventListener("click", () => {
         toggleDeleteMode();
       });
+
+      /*
+       * Afficher un log : C + A + L
+       * Commenter ce log : A + S + C
+       * Uncomment : A + S + U
+       * Supprimer le log : A + S + D
+       */
     </script>
   </body>
 </html>

@@ -19,7 +19,16 @@ function createNewTask(task, checked = false) {
 	let checkbox = document.createElement("input");
 	checkbox.type = "checkbox";
 	li.appendChild(checkbox);
-	li.appendChild(document.createTextNode(" " + task));
+
+	let spanLabel = document.createElement("span");
+	spanLabel.className = "label";
+	spanLabel.textContent = " " + task;
+	li.appendChild(spanLabel);
+
+	let p = document.createElement("p");
+	p.className = "date";
+	p.appendChild(document.createTextNode(showDate()));
+	li.appendChild(p);
 	unorderedList.appendChild(li);
 
 	enterTaskInput.value = "";
@@ -82,6 +91,7 @@ function storeTask(task) {
 	object1.label = task;
 	object1.statut = "unchecked";
 	object1.category = "none";
+	object1.date = showDate();
 	taskListStored.push(object1);
 	sauvegarder(taskListStored);
 }
@@ -102,7 +112,9 @@ function normalizeText(text) {
 function taskVerification(task) {
 	let found = false;
 	for (let li of unorderedList.querySelectorAll("li")) {
-		if (normalizeText(li.textContent.trim()) === normalizeText(task)) {
+		const label = li.querySelector("span.label");
+		if (!label) continue;
+		if (normalizeText(label.textContent.trim()) === normalizeText(task)) {
 			found = true;
 			break;
 		}
@@ -246,10 +258,10 @@ enterTaskInput // Ajouter avec la touche entrer
 let taskListStored = sync();
 if (taskListStored) {
 	taskListStored.forEach((task) => {
-		if(task.statut === "unchecked"){
-		createNewTask(task.label);
-		}else if(task.statut === "checked"){
-			createNewTask(task.label, true)
+		if (task.statut === "unchecked") {
+			createNewTask(task.label);
+		} else if (task.statut === "checked") {
+			createNewTask(task.label, true);
 		}
 	});
 }
@@ -297,3 +309,14 @@ unorderedList.querySelectorAll("li").forEach((li) => {
 		sauvegarder(taskListStored);
 	});
 });
+
+function showDate() {
+	let now = new Date();
+	return (
+		now.toLocaleDateString() +
+		" - " +
+		now.getHours() +
+		":" +
+		now.getMinutes()
+	);
+}

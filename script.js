@@ -297,8 +297,9 @@ deleteAllTaskButton.addEventListener("click", deleteAll);
 unorderedList.querySelectorAll("li").forEach((li) => {
 	li.addEventListener("change", () => {
 		let taskListStored = sync();
+		let span = li.querySelector("span");
 		let index = taskListStored.findIndex(
-			(t) => t.label === li.textContent.trim()
+			(t) => t.label === span.textContent.trim()
 		);
 
 		taskListStored[index].statut =

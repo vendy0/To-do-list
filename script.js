@@ -321,3 +321,5 @@ function showDate() {
 		now.getMinutes()
 	);
 }
+
+document.getElementById("year").textContent = new Date().getFullYear();

@@ -1,181 +1,234 @@
-/** @format */
+ // LES VARIABLES
+      const unorderedList = document.getElementById("unordered-list");
+      let placeholder = document.getElementById("placeholder");
+      const enterTaskInput = document.getElementById("enter-task-input");
+      const addTaskButton = document.getElementById("add-task-button");
+      const deleteATaskButton = document.getElementById("delete-a-task-button");
+      const deleteAllTaskButton = document.getElementById(
+        "delete-all-task-button"
+      );
 
-// Les variables
-let itemPlaceholder = document.getElementById("item-placeholder");
-const unorderedList = document.getElementById("unordered-list");
-const addTask = document.getElementById("add-task");
-const taskInput = document.getElementById("task-input");
-const deleteTask = document.getElementById("delete-task");
-const deleteAllButton = document.getElementById("delete-all-button");
+      /*
+       * LES FONCTIONS
+       */
+      // Fonction pour ajouter des tâches :
+      function createNewTask(task) {
+        deletePlaceholder();
 
-// Fonction pour changer le mode du Bouton delete.
-function updateDeleteButtonState() {
-	let children = unorderedList.querySelectorAll("li");
-	const isInSaveMode = deleteTask.dataset.action === "save";
+        let li = document.createElement("li");
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        li.appendChild(checkbox);
+        li.appendChild(document.createTextNode(" " + task));
+        unorderedList.appendChild(li);
 
-	if (
-		isInSaveMode &&
-		children.length === 1 &&
-		children[0] === itemPlaceholder
-	) {
-		deleteTask.disabled = true;
-		deleteAllButton.disabled = true;
-	} else {
-		deleteTask.disabled = false;
-		deleteAllButton.disabled = false;
-	}
-}
+        enterTaskInput.value = "";
+        enterTaskInput.focus();
+      }
 
-// Fonction creatrice de tache
-function createNewTask(task, isPlaceholder = false) {
-	const checkbox = document.createElement("input");
-	checkbox.type = "checkbox";
-	const li = document.createElement("li");
-	li.appendChild(checkbox);
-	li.appendChild(document.createTextNode(" " + task));
-	unorderedList.appendChild(li);
-	taskInput.value = "";
-	taskInput.focus();
-	checkbox.dataset.state = "unchecked";
+      // Fonction pour ajouter le placeholder
+      function newPlaceholder() {
+        placeholder = createPlaceholder();
+        unorderedList.appendChild(placeholder);
+      }
 
-	if (isPlaceholder) {
-		li.id = "itemPlaceholder";
-	}
-}
+      // Fonction pour créer le placeholder :
+      function createPlaceholder() {
+        let li = document.createElement("li");
+        li.id = "placeholder";
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.disabled = true;
+        li.appendChild(checkbox);
+        li.appendChild(document.createTextNode("..."));
+        placeholder = li;
 
-// Fonction créatrice de PlaceHolder
-function newPlaceholder() {
-	createNewTask("...", true);
-	itemPlaceholder = unorderedList.lastChild;
-}
+        return li;
+      }
 
-// Verifie les éléments du localStorage puis supprime le placeHolder
-let taskList = JSON.parse(localStorage.getItem("taskList") || "[]");
-if (taskList.length != 0) {
-	itemPlaceholder.remove();
-	itemPlaceholder = null;
-}
+      // Fonction pour supprimer le placeholder
+      function deletePlaceholder() {
+        placeholder = document.getElementById("placeholder");
+        if (placeholder && unorderedList.contains(placeholder)) {
+          placeholder.remove();
+          placeholder = null;
+        }
+      }
 
-// Ajouter les éléments du localStorage
-taskList.forEach(createNewTask);
-updateDeleteButtonState();
+      // Fonction pour Sauvegarder les tâches dans le localStorage
+      function storeTask(task) {
+        let taskListStored = JSON.parse(
+          localStorage.getItem("taskList") || "[]"
+        );
+        let object1 = {};
+        object1.label = task;
+        object1.statut = "unchecked";
+        object1.category = "none";
+        taskListStored.push(object1);
+        sauvegarder(taskListStored);
+      }
 
-// Bouton ajouter, ajouter une nouvelle tache !
-// Ajouter un élément avec la touche Entrée.
-taskInput.addEventListener("keypress", (e) => {
-	if (e.key === "Enter") addTask.click();
-});
+      // Fonction pour virer les accents et la casse
+      function normalizeText(text) {
+        return text
+          .normalize("NFD") // Décompose les accents
+          .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques
+          .toUpperCase(); // Insensible à la casse
+      }
 
-addTask.addEventListener("click", () => {
-	let newTask = taskInput.value.trim();
-	if (taskList.includes(newTask)) {
-		alert("Cette tâche existe déjà !");
-		taskInput.value = "";
-		return;
-	}
-	// Si l'entrée est vide.	/ S'il y a encore l'élément PlaceHolder
-	if (!newTask) {
-		alert("Entrez une tache valide !");
-		taskInput.value = "";
-		return;
-	}
-	if (itemPlaceholder) {
-		itemPlaceholder.remove();
-		itemPlaceholder = null;
-	}
-	// Ajouter la nouvelle tache (newTask) et l'ajouter à la taskList.
-	createNewTask(newTask);
-	taskList.push(newTask);
-	updateDeleteButtonState();
+      /*
+       * FONCTION POUR VÉRIFIER LA TÂCHE ENTRÉE
+       * Vérifie si l'entrée n'est pas vide
+       * Vérifie si la tâche n'existe pas déjà
+       */
+      function taskVerification(task) {
+        let found = false;
+        for (let li of unorderedList.querySelectorAll("li")) {
+          if (normalizeText(li.textContent.trim()) === normalizeText(task)) {
+            found = true;
+            break;
+          }
+        }
+        if (!task) {
+          alert("Entrez une tâche valide !");
+          return false;
+        } else if (found) {
+          alert("Cette tâche existe déjà !");
+          enterTaskInput.value = "";
+          return false;
+        } else {
+          return true;
+        }
+      }
 
-	// Sauvegarder la nouvelle tâche dans le local storage
-	localStorage.setItem("taskList", JSON.stringify(taskList));
-});
+      // Fonction pour recréer les elements pour supprimer l'ecouteur d'Event
+      function recreateElements() {
+        document.querySelectorAll("li").forEach(li => {
+          li.classList.remove("delete-mode");
+          let clone = li.cloneNode(true);
+          li.replaceWith(clone);
+        });
+      }
 
-// Supprimer un élément.
-function toogleDeleteMode() {
-	let children = unorderedList.querySelectorAll("li");
-	let tasks = JSON.parse(localStorage.getItem("taskList") || "[]");
-	// Changer le texte et le data state du bouton
-	if (deleteTask.dataset.action === "save") {	
-		// Comme la condition n’est pas respectée, on agit comme dans "default"
-		deleteTask.dataset.action = "delete";
-		deleteTask.textContent = "Terminé";
-		addTask.disabled = true;
-		taskInput.disabled = true;
-		deleteAllButton.disabled = true;
-	} else {
-		// Revenir en mode normal
-		deleteTask.dataset.action = "save";
-		deleteTask.textContent = "Supprimer une tâche";
-		addTask.disabled = false;
-		taskInput.disabled = false;
-		deleteAllButton.disabled = false;
-		updateDeleteButtonState();
-	}
+      // Fonction pour supprimer une tache
+      function deleteATask(task) {
+        let taskListDisplay = unorderedList.querySelectorAll("li");
+        deletePlaceholder();
+        let taskListStored = sync();
+        let index = taskListStored.findIndex(
+          t => t.label === task.textContent.trim()
+        );
 
-	// Option de suppression au click.
-	// Ajout des li sous forme de tableau taskList, Écouteur d'évènement.
-	children.forEach((child) => {
-		// Vérifie si l'écouteur est déjà ajouté.
-		if (child.dataset.listener === "true") return;
-		child.addEventListener("click", () => {
-			// Arrête la suppression si c'est le placeholder.
-			// Confirmation de supression.
-			if (
-				child == itemPlaceholder ||
-				deleteTask.dataset.action === "save"
-			)
-				return;
+        taskListStored.splice(index, 1);
+        return taskListStored;
+      }
 
-			let label = child.textContent.trim();
-			let hasConfirmed = false;
-			if (!hasConfirmed) {
-				hasConfirmed = confirm(
-					`Voulez-vous vraiment effacer cette tâche de la liste \"${label}\" ?`
-				);
+      // Fonction pour sauvegarder dans le localStorage
+      function sauvegarder(taskListStored) {
+        localStorage.setItem("taskList", JSON.stringify(taskListStored));
+      }
 
-				// Si c'est confirmé on change le data state, on supprime l'élément, puis on sauvegarde dans le local storage.
-				if (hasConfirmed) {
-					let index = tasks.findIndex((t) => t === label);
-					if (index != -1) tasks.splice(index, 1);
-					localStorage.setItem("taskList", JSON.stringify(tasks));
-					child.remove();
-					taskList = tasks;
+      // Fonction pour recuperer du le localStorage
+      function sync() {
+        let taskListStored = JSON.parse(
+          localStorage.getItem("taskList") || "[]"
+        );
+        return taskListStored;
+      }
 
-					if (unorderedList.children.length == 0) {
-						newPlaceholder();
-					}
-					updateDeleteButtonState();
-				}
-			}
-		});
-		child.dataset.listener = "true";
-	});
-}
+      // Fonction de suppression
+      function deleteMode() {
+        let taskListDisplay = unorderedList.querySelectorAll("li");
+        taskListDisplay.forEach(task => {
+          task.addEventListener("click", () => {
+            // Confirmation :
+            let hasConfirmed = false;
+            hasConfirmed = confirm(
+              `Voulez-vous vraiment supprimer cette tache : ${task.textContent} ?`
+            );
 
-deleteTask.addEventListener("click", toogleDeleteMode);
+            if (hasConfirmed) {
+              let taskListStored = deleteATask(task);
+              task.remove();
+              let taskListDisplay = unorderedList.querySelectorAll("li");
+              if (taskListDisplay.length === 0) newPlaceholder();
+              sauvegarder(taskListStored);
+            }
+          });
+        });
+      }
 
-// Fonction de suppression totale.
-function deleteAllFunction() {
-	let children = unorderedList.querySelectorAll("li");
-	let hasConfirmed = false;
+      /*
+       * Fonction pour Changer de mode save / delete.
+       * Changer de mode
+       * Désactiver l'input et les boutons
+       */
+      function toggleDeleteMode() {
+        if (deleteATaskButton.dataset.mode == "saveMode") {
+          deleteATaskButton.dataset.mode = "deleteMode";
+          deleteATaskButton.textContent = "Terminé";
+          addTaskButton.disabled = true;
+          enterTaskInput.disabled = true;
+          deleteAllTaskButton.disabled = true;
 
-	hasConfirmed = confirm("Voulez-vous vraiment TOUT supprimer ?");
-	if (hasConfirmed) {
-		children.forEach((child) => {
-			child.remove();
-		});
-		newPlaceholder();
-		localStorage.removeItem("taskList");
-		updateDeleteButtonState();
-	}
-}
+          deleteMode();
+        } else {
+          deleteATaskButton.dataset.mode = "saveMode";
+          deleteATaskButton.textContent = "Supprimer une tâche";
+          addTaskButton.disabled = false;
+          enterTaskInput.disabled = false;
+          deleteAllTaskButton.disabled = false;
 
-// Option pour tout supprimer
-deleteAllButton.addEventListener("click", deleteAllFunction);
+          recreateElements();
+        }
+      }
 
-// Sauvegarde du checkbox.
-// La case à cocher
+      // Fontion pour tout supprimer :
+      function deleteAll() {
+        let hasConfirmed = false;
+        hasConfirmed = confirm("Voulez-vous vraiment TOUT supprimer ?");
+        if (hasConfirmed) {
+          localStorage.removeItem("taskList");
+          unorderedList.querySelectorAll("li").forEach(li => {
+            li.remove();
+          });
+          newPlaceholder();
+        }
+      }
 
-// Le problème mtn c'est que si je supprime une tâche mais que je ne confirme pas, bien sûr la tâche n'est pas supprimée mais je ne peux plus là toucher pour la supprimer. Pour ça je devrai repasser en mode save puis revenir sur delete.
+      enterTaskInput // Ajouter avec la touche entrer
+        .addEventListener("keypress", e => {
+          if (e.key === "Enter") addTaskButton.click();
+        });
+
+      // Recupérer le localStorage et placer les tâches
+      let taskListStored = sync();
+      if (taskListStored) {
+        taskListStored.forEach(task => {
+          createNewTask(task.label);
+        });
+      }
+
+      // Ajouter des tâches au clic.
+      addTaskButton.addEventListener("click", () => {
+        let taskListDisplay = unorderedList.querySelectorAll("li");
+        let newTask = enterTaskInput.value.trim();
+        let inputIsOkay = taskVerification(newTask);
+        if (!inputIsOkay) return;
+        createNewTask(newTask);
+        storeTask(newTask);
+      });
+
+      // Supprimer un élément
+      deleteATaskButton.addEventListener("click", () => {
+        toggleDeleteMode();
+      });
+
+      // Supprimer tous les elements :
+      deleteAllTaskButton.addEventListener("click", deleteAll);
+      /*
+       * Afficher un log : C + A + L
+       * Commenter ce log : A + S + C
+       * Uncomment : A + S + U
+       * Supprimer le log : A + S + D
+       */

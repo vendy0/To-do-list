@@ -1,51 +1,53 @@
-<!-- @format -->
-
 <!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<title>Document</title>
-		<link rel="stylesheet" href="style.css" type="text/css" media="all" />
-		<style type="text/css" media="all">
-			#unordered-list {
-				list-style-type: none;
-			}
-		</style>
-	</head>
-	<body>
-		<header>
-			<h1>To do list</h1>
-			<ul>
-				<li>Listez</li>
-				<li>Planifier</li>
-				<li>Organisez</li>
-			</ul>
-		</header>
-		<hr>
-		<main>
-			<ul id="unordered-list">
-				<li id="item-placeholder"
-					><input type="checkbox" name="" id="" />...</li
-				>
-			</ul>
-			<input
-				type="text"
-				name="task-input"
-				id="task-input"
-				value=""
-				placeholder="Entrez une tâche..." />
-			<button id="add-task" type="submit">Ajouter</button>
-			<button id="delete-task" type="submit" data-state="save"
-				>Supprimer une tâche</button
-			>
-			<button id="delete-all-button" type="submit"
-				>Supprimer toutes les tâches</button
-			>
-		</main>
-		<footer> </footer>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" type="text/css" media="all" />
+    <style type="text/css" media="all">
+      #unordered-list {
+        list-style-type: none;
+      }
+      li:hover {
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>To do list</h1>
+      <ul>
+        <li>Listez</li>
+        <li>Planifier</li>
+        <li>Organisez</li>
+      </ul>
+    </header>
+    <hr />
+    <main>
+      <ul id="unordered-list">
+        <li id="placeholder">
+          <input type="checkbox" name="" id="" disabled="disabled" />...
+        </li>
+      </ul>
+      <input
+        type="text"
+        name="enter-task-input"
+        id="enter-task-input"
+        value=""
+        placeholder="Entrez une tâche..."
+      />
+      <button id="add-task-button" type="submit">Ajouter</button>
+      <button id="delete-a-task-button" type="submit" data-mode="saveMode">
+        Supprimer une tâche
+      </button>
+      <button id="delete-all-task-button" type="submit">
+        Supprimer toutes les tâches
+      </button>
+    </main>
+    <footer></footer>
 
-		<script src="script.js" type="text/javascript" charset="utf-8"></script>
-	</body>
+    <script src="./script.js">
+    </script>
+  </body>
 </html>

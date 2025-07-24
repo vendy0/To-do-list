@@ -12,7 +12,7 @@ const deleteAllTaskButton = document.getElementById("delete-all-task-button");
  * LES FONCTIONS
  */
 // Fonction pour ajouter des tâches :
-function createNewTask(task) {
+function createNewTask(task, checked = false) {
 	deletePlaceholder();
 
 	let li = document.createElement("li");
@@ -24,6 +24,10 @@ function createNewTask(task) {
 
 	enterTaskInput.value = "";
 	enterTaskInput.focus();
+
+	if (checked) {
+		checkbox.checked = true;
+	}
 }
 
 // Fonction pour ajouter le placeholder
@@ -173,22 +177,16 @@ function deleteMode() {
 // Fonction pour Désactiver les checkboxs
 function disableCheckboxes(disable) {
 	let checkboxes = unorderedList.querySelectorAll("input");
-	if(disable){
-	checkboxes.forEach((checkbox) => {
-		checkbox.disabled = true;
-	});
-	}else{
-	checkboxes.forEach((checkbox) => {
-		checkbox.disabled = false;
-	});
+	if (disable) {
+		checkboxes.forEach((checkbox) => {
+			checkbox.disabled = true;
+		});
+	} else {
+		checkboxes.forEach((checkbox) => {
+			checkbox.disabled = false;
+		});
 	}
 }
-
-/*
-window.addEventListener("click", ()=>{
-	disableCheckboxes();
-});
-*/
 
 /*
  * Fonction pour Changer de mode save / delete.
@@ -233,6 +231,8 @@ function deleteAll() {
 	}
 }
 
+// Fonction pour checker
+
 /**
  * LE CODE
  */
@@ -246,7 +246,11 @@ enterTaskInput // Ajouter avec la touche entrer
 let taskListStored = sync();
 if (taskListStored) {
 	taskListStored.forEach((task) => {
+		if(task.statut === "unchecked"){
 		createNewTask(task.label);
+		}else if(task.statut === "checked"){
+			createNewTask(task.label, true)
+		}
 	});
 }
 
@@ -277,3 +281,19 @@ deleteAllTaskButton.addEventListener("click", deleteAll);
  * Uncomment : A + S + U
  * Supprimer le log : A + S + D
  */
+
+unorderedList.querySelectorAll("li").forEach((li) => {
+	li.addEventListener("change", () => {
+		let taskListStored = sync();
+		let index = taskListStored.findIndex(
+			(t) => t.label === li.textContent.trim()
+		);
+
+		taskListStored[index].statut =
+			taskListStored[index].statut === "checked"
+				? "unchecked"
+				: "checked";
+
+		sauvegarder(taskListStored);
+	});
+});

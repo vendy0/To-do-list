@@ -26,7 +26,9 @@
     <hr />
     <main>
       <ul id="unordered-list">
-        <li id="placeholder"><input type="checkbox" name="" id="" />...</li>
+        <li id="placeholder">
+          <input type="checkbox" name="" id="" disabled="disabled" />...
+        </li>
       </ul>
       <input
         type="text"
@@ -48,7 +50,7 @@
     <script>
       // LES VARIABLES
       const unorderedList = document.getElementById("unordered-list");
-      const placeholder = document.getElementById("placeholder");
+      let placeholder = document.getElementById("placeholder");
       const enterTaskInput = document.getElementById("enter-task-input");
       const addTaskButton = document.getElementById("add-task-button");
       const deleteATaskButton = document.getElementById("delete-a-task-button");
@@ -61,6 +63,7 @@
        */
       // Fonction pour ajouter des tâches :
       function createNewTask(task) {
+        deletePlaceholder();
         let li = document.createElement("li");
         let checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -70,6 +73,19 @@
 
         enterTaskInput.value = "";
         enterTaskInput.focus();
+      }
+
+      // Fonction pour ajouter le placeholder
+      function newPlaceholder() {
+        unorderedList.appendChild(placeholder);
+      }
+
+      // Fonction pour supprimer le placeholder
+      function deletePlaceholder() {
+        let taskListDisplay = unorderedList.querySelectorAll("li");
+        if (taskListDisplay[0] === placeholder) {
+          taskListDisplay[0].remove();
+        }
       }
 
       // Fonction pour Sauvegarder les tâches dans le localStorage
@@ -129,7 +145,8 @@
 
       // Fonction pour supprimer une tache
       function deleteATask(task) {
-        let taskListStored = sync();
+        let taskListDisplay = unorderedList.querySelectorAll("li");
+        if (taskListDisplay[0] === placeholder) deletePlaceholder();
         let index = taskListStored.findIndex(
           (t) => t.label === task.textContent.trim()
         );
@@ -152,7 +169,10 @@
 
       // Fonction de suppression
       function deleteMode() {
-        unorderedList.querySelectorAll("li").forEach((task) => {
+        let taskListDisplay = unorderedList.querySelectorAll("li");
+        if (taskListDisplay.length === 1 && taskListDisplay[0] === placeholder)
+          return;
+        taskListDisplay.forEach((task) => {
           task.addEventListener("click", () => {
             // Confirmation :
             let hasConfirmed = false;
@@ -163,6 +183,8 @@
             if (hasConfirmed) {
               let taskListStored = deleteATask(task);
               task.remove();
+              let taskListDisplay = unorderedList.querySelectorAll("li");
+              if (taskListDisplay.length === 0) newPlaceholder();
               sauvegarder(taskListStored);
             }
           });
@@ -194,15 +216,26 @@
         }
       }
 
-      // Fonction pour supprimer des éléments
+      // Fontion pour tout supprimer :
+      function deleteAll() {
+        let hasConfirmed = false;
+        hasConfirmed = confirm("Voulez-vous vraiment TOUT supprimer ?");
+        if (hasConfirmed) {
+          localStorage.removeItem("taskList");
+          unorderedList.querySelectorAll("li").forEach((li) => {
+            li.remove();
+          });
+          newPlaceholder();
+        }
+      }
 
-      // Ajouter avec la touche entrer
-      enterTaskInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") addTaskButton.click();
-      });
+      enterTaskInput // Ajouter avec la touche entrer
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") addTaskButton.click();
+        });
 
       // Recupérer le localStorage et placer les tâches
-      let taskListStored = JSON.parse(localStorage.getItem("taskList") || "[]");
+      let taskListStored = sync();
       if (taskListStored) {
         taskListStored.forEach((task) => {
           createNewTask(task.label);
@@ -224,6 +257,8 @@
         toggleDeleteMode();
       });
 
+      // Supprimer tous les elements :
+      deleteAllTaskButton.addEventListener("click", deleteAll);
       /*
        * Afficher un log : C + A + L
        * Commenter ce log : A + S + C

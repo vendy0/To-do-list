@@ -42,6 +42,9 @@ function disableButtons() {
 	) {
 		deleteATaskButton.disabled = true;
 		deleteAllTaskButton.disabled = true;
+	} else {
+		deleteATaskButton.disabled = false;
+		deleteAllTaskButton.disabled = false;
 	}
 }
 
@@ -167,10 +170,31 @@ function deleteMode() {
 	});
 }
 
+// Fonction pour Désactiver les checkboxs
+function disableCheckboxes(disable) {
+	let checkboxes = unorderedList.querySelectorAll("input");
+	if(disable){
+	checkboxes.forEach((checkbox) => {
+		checkbox.disabled = true;
+	});
+	}else{
+	checkboxes.forEach((checkbox) => {
+		checkbox.disabled = false;
+	});
+	}
+}
+
+/*
+window.addEventListener("click", ()=>{
+	disableCheckboxes();
+});
+*/
+
 /*
  * Fonction pour Changer de mode save / delete.
  * Changer de mode
  * Désactiver l'input et les boutons
+ * Désactiver les checkbox
  */
 function toggleDeleteMode() {
 	if (deleteATaskButton.dataset.mode == "saveMode") {
@@ -181,6 +205,7 @@ function toggleDeleteMode() {
 		deleteAllTaskButton.disabled = true;
 
 		deleteMode();
+		disableCheckboxes(true);
 	} else {
 		deleteATaskButton.dataset.mode = "saveMode";
 		deleteATaskButton.textContent = "Supprimer une tâche";
@@ -189,6 +214,7 @@ function toggleDeleteMode() {
 		deleteAllTaskButton.disabled = false;
 
 		recreateElements();
+		disableCheckboxes(true);
 	}
 }
 
@@ -202,7 +228,7 @@ function deleteAll() {
 			li.remove();
 		});
 		newPlaceholder();
-		
+
 		disableButtons();
 	}
 }
@@ -234,6 +260,7 @@ addTaskButton.addEventListener("click", () => {
 	if (!inputIsOkay) return;
 	createNewTask(newTask);
 	storeTask(newTask);
+	disableButtons();
 });
 
 // Supprimer un élément

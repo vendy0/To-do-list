@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
@@ -64,6 +64,7 @@
       // Fonction pour ajouter des tâches :
       function createNewTask(task) {
         deletePlaceholder();
+
         let li = document.createElement("li");
         let checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -77,14 +78,30 @@
 
       // Fonction pour ajouter le placeholder
       function newPlaceholder() {
+        placeholder = createPlaceholder();
         unorderedList.appendChild(placeholder);
+      }
+
+      // Fonction pour créer le placeholder :
+      function createPlaceholder() {
+        let li = document.createElement("li");
+        li.id = "placeholder";
+        let checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.disabled = true;
+        li.appendChild(checkbox);
+        li.appendChild(document.createTextNode("..."));
+        placeholder = li;
+
+        return li;
       }
 
       // Fonction pour supprimer le placeholder
       function deletePlaceholder() {
-        let taskListDisplay = unorderedList.querySelectorAll("li");
-        if (taskListDisplay[0] === placeholder) {
-          taskListDisplay[0].remove();
+        placeholder = document.getElementById("placeholder");
+        if (placeholder && unorderedList.contains(placeholder)) {
+          placeholder.remove();
+          placeholder = null;
         }
       }
 
@@ -134,9 +151,9 @@
         }
       }
 
-      // Fonction pour recreer les elements pour supprimer l'ecouteur d'Event
+      // Fonction pour recréer les elements pour supprimer l'ecouteur d'Event
       function recreateElements() {
-        document.querySelectorAll("li").forEach((li) => {
+        document.querySelectorAll("li").forEach(li => {
           li.classList.remove("delete-mode");
           let clone = li.cloneNode(true);
           li.replaceWith(clone);
@@ -146,10 +163,12 @@
       // Fonction pour supprimer une tache
       function deleteATask(task) {
         let taskListDisplay = unorderedList.querySelectorAll("li");
-        if (taskListDisplay[0] === placeholder) deletePlaceholder();
+        deletePlaceholder();
+        let taskListStored = sync();
         let index = taskListStored.findIndex(
-          (t) => t.label === task.textContent.trim()
+          t => t.label === task.textContent.trim()
         );
+
         taskListStored.splice(index, 1);
         return taskListStored;
       }
@@ -170,9 +189,7 @@
       // Fonction de suppression
       function deleteMode() {
         let taskListDisplay = unorderedList.querySelectorAll("li");
-        if (taskListDisplay.length === 1 && taskListDisplay[0] === placeholder)
-          return;
-        taskListDisplay.forEach((task) => {
+        taskListDisplay.forEach(task => {
           task.addEventListener("click", () => {
             // Confirmation :
             let hasConfirmed = false;
@@ -222,7 +239,7 @@
         hasConfirmed = confirm("Voulez-vous vraiment TOUT supprimer ?");
         if (hasConfirmed) {
           localStorage.removeItem("taskList");
-          unorderedList.querySelectorAll("li").forEach((li) => {
+          unorderedList.querySelectorAll("li").forEach(li => {
             li.remove();
           });
           newPlaceholder();
@@ -230,14 +247,14 @@
       }
 
       enterTaskInput // Ajouter avec la touche entrer
-        .addEventListener("keypress", (e) => {
+        .addEventListener("keypress", e => {
           if (e.key === "Enter") addTaskButton.click();
         });
 
       // Recupérer le localStorage et placer les tâches
       let taskListStored = sync();
       if (taskListStored) {
-        taskListStored.forEach((task) => {
+        taskListStored.forEach(task => {
           createNewTask(task.label);
         });
       }

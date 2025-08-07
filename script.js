@@ -14,20 +14,27 @@ const deleteAllTaskButton = document.getElementById("delete-all-task-button")
 // Fonction pour ajouter des tâches :
 function createNewTask(task, checked = false) {
 	deletePlaceholder()
-
-	let li = document.createElement("li")
-	let checkbox = document.createElement("input")
+	const li = document.createElement("li")
+	// ID unique pour lier input et label
+	const id = "task-" + Date.now()
+	const checkbox = document.createElement("input")
 	checkbox.type = "checkbox"
+	checkbox.id = id
+
+	const label = document.createElement("label")
+	label.htmlFor = id
+	label.textContent = task
+
+	if (checked) checkbox.checked = true
+
 	li.appendChild(checkbox)
-	li.appendChild(document.createTextNode(" " + task))
+	li.appendChild(label)
 	unorderedList.appendChild(li)
+
+	attachCheckboxListener(li)
 
 	enterTaskInput.value = ""
 	enterTaskInput.focus()
-
-	if (checked) {
-		checkbox.checked = true
-	}
 }
 
 // Fonction pour ajouter le placeholder
@@ -54,15 +61,22 @@ function disableButtons() {
 
 // Fonction pour créer le placeholder :
 function createPlaceholder() {
-	let li = document.createElement("li")
+	const li = document.createElement("li")
 	li.id = "placeholder"
-	let checkbox = document.createElement("input")
+
+	const checkbox = document.createElement("input")
 	checkbox.type = "checkbox"
 	checkbox.disabled = true
-	li.appendChild(checkbox)
-	li.appendChild(document.createTextNode("..."))
-	placeholder = li
+	checkbox.id = "placeholder-input"
 
+	const label = document.createElement("label")
+	label.htmlFor = "placeholder-input"
+	label.textContent = "..."
+
+	li.appendChild(checkbox)
+	li.appendChild(label)
+
+	placeholder = li
 	return li
 }
 
@@ -232,6 +246,28 @@ function deleteAll() {
 	}
 }
 
+function attachCheckboxListener(li) {
+	const checkbox = li.querySelector("input[type='checkbox']")
+	if (!checkbox) return
+
+	checkbox.addEventListener("change", () => {
+		let taskListStored = sync()
+		let label = li.querySelector("label")
+		if (!label) return
+		let index = taskListStored.findIndex(
+			(t) =>
+				normalizeText(t.label) ===
+				normalizeText(label.textContent.trim())
+		)
+		if (index >= 0) {
+			taskListStored[index].statut = checkbox.checked
+				? "checked"
+				: "unchecked"
+			sauvegarder(taskListStored)
+		}
+	})
+}
+
 // Fonction pour checker
 
 /**
@@ -282,17 +318,6 @@ deleteAllTaskButton.addEventListener("click", deleteAll)
  * Uncomment : A + S + U
  * Supprimer le log : A + S + D
  */
-
 unorderedList.querySelectorAll("li").forEach((li) => {
-	li.addEventListener("change", () => {
-		let taskListStored = sync()
-		let index = taskListStored.findIndex(
-			(t) => t.label === li.textContent.trim()
-		)
-
-		taskListStored[index].statut =
-			taskListStored[index].statut === "checked" ? "unchecked" : "checked"
-
-		sauvegarder(taskListStored)
-	})
+	attachCheckboxListener(li)
 })

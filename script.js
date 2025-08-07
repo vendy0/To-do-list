@@ -321,3 +321,5 @@ deleteAllTaskButton.addEventListener("click", deleteAll)
 unorderedList.querySelectorAll("li").forEach((li) => {
 	attachCheckboxListener(li)
 })
+
+newPlaceholder()
